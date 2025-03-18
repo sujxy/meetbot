@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const transcriptSchema = new mongoose.Schema(
   {
     meeting_id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
       required: true,
       index: true,
     },
@@ -25,5 +26,4 @@ const transcriptSchema = new mongoose.Schema(
 );
 
 const Transcript = mongoose.model("Transcript", transcriptSchema);
-
 export default Transcript;

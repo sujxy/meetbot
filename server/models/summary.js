@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const summarySchema = new mongoose.Schema(
   {
-    meetingId: {
-      type: String,
+    meeting_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
       required: true,
       index: true,
     },
@@ -11,10 +12,12 @@ const summarySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Transcript",
       required: true,
+      index: true,
     },
     content: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
     },
   },
   { timestamps: true }

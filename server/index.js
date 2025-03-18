@@ -12,6 +12,7 @@ import { Groq } from "groq-sdk";
 import Summary from "./models/summary.js";
 import fs from "fs";
 import path from "path";
+import Meeting from "./models/meeting.js";
 
 const PORT = 8000;
 
@@ -53,8 +54,8 @@ io.on("connection", (socket) => {
     })
     .on("data", async (data) => {
       if (data.results[0]?.alternatives[0]) {
-        console.log(data.results[0].transcript);
         const transcriptChunk = data.results[0].alternatives[0].transcript;
+        console.log(transcriptChunk);
         socket.emit("transcription", transcriptChunk);
         if (meetingId) {
           await Transcript.findOneAndUpdate(
@@ -169,12 +170,14 @@ app.get("/summarize", async (req, res) => {
 
     const summaryText = summaryResponse.choices[0].message.content;
 
-    const newSummary = new Summary({
-      meetingId: meetId,
-      transcript_id: transcript._id,
-      content: summaryText,
-    });
-    await newSummary.save();
+    const updatedSummary = await Summary.findOneAndUpdate(
+      { meeting_id: meetId },
+      {
+        transcript_id: transcript._id,
+        content: summaryText,
+      },
+      { new: true, upsert: true }
+    );
 
     const extractedContent = summaryText.replace(/<\/?summary>/g, "");
 
@@ -189,12 +192,52 @@ app.get("/summarize", async (req, res) => {
   }
 });
 
-app.get("/view", async (req, res) => {
+app.post("/meeting/new", async (req, res) => {
+  try {
+    const newMeeting = new Meeting({ title: "New-meeting" });
+    await newMeeting.save();
+    res.status(200).json({
+      success: true,
+      meetId: newMeeting._id,
+    });
+  } catch (error) {
+    console.log("error creating meeting : ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/summary", async (req, res) => {
   const { meetId } = req.query;
 
-  const summary = await Summary.findOne({ meetingId: meetId });
+  const summary = await Summary.findOne({ meeting_id: meetId });
 
-  res.send(summary.content);
+  res.status(200).json({ success: true, summary: summary.content });
+});
+
+app.post("/meeting/delete/:id", async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    console.log("deleting : ", meetingId);
+
+    const meeting = await Meeting.findById(meetingId);
+    if (!meeting) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Meeting not found" });
+    }
+
+    await Transcript.deleteOne({ meeting_id: meetingId });
+    await Summary.deleteOne({ meeting_id: meetingId });
+    await Meeting.findByIdAndDelete(meetingId);
+
+    res.json({
+      success: true,
+      message: "Meeting and associated data deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting meeting:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 app.get("/", (req, res) => {

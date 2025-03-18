@@ -1,7 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import Wrapper from "./components/Wrapper";
 import MeetingPage from "./views/meetingPage";
+import axios from "axios";
 
+axios.defaults.baseURL = "http://localhost:8000";
 const App: React.FC = () => {
   return (
     <Routes>
