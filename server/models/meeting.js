@@ -23,6 +23,14 @@ const MeetingSchema = new mongoose.Schema(
       type: String,
       default: "00:00",
     },
+    keypoints: {
+      type: [String],
+      default: [],
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

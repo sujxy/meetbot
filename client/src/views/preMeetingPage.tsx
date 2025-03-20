@@ -34,7 +34,7 @@ const PreMeetingState = ({
           </p>
         </span>
       </div>
-      <div className="mt-12 p-4 border border-gray-200 rounded-md bg-white w-2/5 xl:w-1/5 mx-auto flex flex-col gap-4">
+      <div className="mt-12 p-4 border border-gray-200 rounded-md bg-white w-4/5 md:w-3/5 lg:w-2/5  mx-auto flex flex-col gap-4">
         <span className="mb-4">
           <h2 className="font-semibold text-xl ">Share Browser Tab</h2>
           <p className="text-sm text-gray-500">

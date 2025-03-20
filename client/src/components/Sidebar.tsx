@@ -1,33 +1,52 @@
 import { Home, CalendarPlus, FileText, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarNavProps {
   onNavigate: (view: string) => void;
   currentView: string;
 }
 
-export function SidebarNav({ onNavigate, currentView }: SidebarNavProps) {
-  const navItems = [
-    {
-      id: "home",
-      title: "Home",
-      icon: Home,
-    },
-    {
-      id: "join",
-      title: "Join Meeting",
-      icon: CalendarPlus,
-    },
-    {
-      id: "summaries",
-      title: "Summaries",
-      icon: FileText,
-    },
-    {
-      id: "settings",
-      title: "Settings",
-      icon: Settings,
-    },
-  ];
+const navItems = [
+  {
+    id: "home",
+    route: "/",
+    title: "Home",
+    icon: Home,
+  },
+  {
+    id: "join-meeting",
+    route: "/join-meeting",
+    title: "Join Meeting",
+    icon: CalendarPlus,
+  },
+  {
+    id: "summary",
+    route: "/summary",
+    title: "Summaries",
+    icon: FileText,
+  },
+  {
+    id: "settings",
+    route: "/settings",
+    title: "Settings",
+    icon: Settings,
+  },
+];
+
+const getPageRoute = () => {
+  const path = window.location.pathname;
+
+  if (path.startsWith("/summary")) {
+    return "summary";
+  } else if (path.startsWith("/join-meeting")) {
+    return "join-meeting";
+  } else {
+    return "home";
+  }
+};
+export function SidebarNav() {
+  const navigate = useNavigate();
+  const activePage = getPageRoute();
 
   return (
     <div className="border-r border-gray-300 w-64">
@@ -43,12 +62,12 @@ export function SidebarNav({ onNavigate, currentView }: SidebarNavProps) {
                 className={`
                   flex h-10 w-full items-center justify-start gap-2 rounded-md px-3 text-sm transition-all
                   ${
-                    currentView === item.id
+                    activePage === item.id
                       ? "bg-gray-100 text-black"
                       : "text-gray-500 hover:bg-gray-100 hover:text-black"
                   }
                 `}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => navigate(item.route)}
               >
                 <item.icon className="h-4 w-4" />
                 {item.title}

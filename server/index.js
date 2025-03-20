@@ -13,6 +13,7 @@ import Summary from "./models/summary.js";
 import fs from "fs";
 import path from "path";
 import Meeting from "./models/meeting.js";
+import { extractLLMResponse } from "./utils/utils.js";
 
 const PORT = 8000;
 
@@ -141,7 +142,7 @@ app.post("/transcribe", upload.single("audioFile"), async (req, res) => {
 
 app.get("/summarize", async (req, res) => {
   try {
-    const { meetId } = req.query;
+    const { meetId, duration } = req.query;
 
     const transcript = await Transcript.findOne({ meeting_id: meetId });
     if (!transcript) {
@@ -168,23 +169,39 @@ app.get("/summarize", async (req, res) => {
       model: "mixtral-8x7b-32768",
     });
 
-    const summaryText = summaryResponse.choices[0].message.content;
+    const rawSummary = summaryResponse.choices[0].message.content;
+    const extractedContent = extractLLMResponse(rawSummary);
 
     const updatedSummary = await Summary.findOneAndUpdate(
       { meeting_id: meetId },
       {
         transcript_id: transcript._id,
-        content: summaryText,
+        content: extractedContent.summary,
       },
       { new: true, upsert: true }
     );
 
-    const extractedContent = summaryText.replace(/<\/?summary>/g, "");
+    const updatedMeeting = await Meeting.findByIdAndUpdate(
+      meetId,
+      {
+        title: extractedContent.title,
+        keypoints: extractedContent.keypoints,
+        duration: duration,
+        tags: extractedContent.tags,
+      },
+      { new: true }
+    );
+
+    if (!updatedMeeting) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Meeting not found/updated !" });
+    }
 
     res.json({
       success: true,
       meetId: meetId,
-      summary: extractedContent,
+      summary: extractedContent.summary,
     });
   } catch (error) {
     console.error("Error during summarization:", error);
@@ -237,6 +254,40 @@ app.post("/meeting/delete/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting meeting:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/meeting/bulk", async (req, res) => {
+  try {
+    const allMeetings = await Meeting.find({});
+    if (allMeetings.length == 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Meetings not found" });
+    }
+
+    res.json({
+      success: true,
+      data: allMeetings,
+    });
+  } catch (error) {
+    console.error("Error geting meeting:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/meeting/:meetId", async (req, res) => {
+  try {
+    const meetingData = await Meeting.findOne({
+      _id: req.params.meetId,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: meetingData,
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

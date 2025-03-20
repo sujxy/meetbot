@@ -2,20 +2,19 @@ import axios from "axios";
 import {
   CheckCircle2,
   Clock,
-  Copy,
   Disc,
   LoaderCircle,
   MessageSquareQuote,
   Monitor,
   ScreenShare,
   ScreenShareOff,
-  Share,
   Sparkles,
   Trash,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import PreMeetingState from "./preMeetingPage";
+import { useNavigate } from "react-router-dom";
 
 const MeetingPage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -23,7 +22,6 @@ const MeetingPage: React.FC = () => {
   //const [currentChunk, setCurrentChunk] = useState<string>("");
   const [transcriptQueue, setTranscriptQueue] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [meetingSummary, setMeetingSummary] = useState<string>("");
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
@@ -32,6 +30,7 @@ const MeetingPage: React.FC = () => {
   const isTyping = useRef<boolean>(false);
   const elapsedTimeRef = useRef<number | null>(null);
   const [pageState, setPageState] = useState<"pre" | "during" | "post">("pre");
+  const navigate = useNavigate();
 
   // useEffect(() => {
   //   if (!currentChunk) return;
@@ -154,10 +153,12 @@ const MeetingPage: React.FC = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        `/summarize?meetId=${localStorage.getItem("MEET_ID")}`
+        `/summarize?meetId=${localStorage.getItem(
+          "MEET_ID"
+        )}&duration=${formatTime(timeElapsed)}`
       );
       if (data.success) {
-        setMeetingSummary(data.summary);
+        navigate(`/summary/${localStorage.getItem("MEET_ID")}`);
       }
     } catch (err: any) {
       alert("Error getting summary !");
@@ -368,29 +369,6 @@ const MeetingPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {meetingSummary && (
-          <div
-            id={"summary-container"}
-            className="mt-4 p-4 border border-gray-200 rounded-md bg-white"
-          >
-            <span className="flex justify-between items-center mb-4 ">
-              <span className="flex items-center gap-2 ">
-                <Sparkles size={20} />
-                <h2 className="font-semibold text-xl ">Meeting Summary</h2>
-              </span>
-              <span className="flex items-center gap-4">
-                <Copy size={18} />
-                <Share size={18} />
-              </span>
-            </span>
-
-            <div
-              className=" px-4 text-md font-light text-gray-700"
-              dangerouslySetInnerHTML={{ __html: meetingSummary }}
-            ></div>
-          </div>
-        )}
       </div>
     );
   }
