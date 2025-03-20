@@ -43,7 +43,7 @@ const SummaryPage: React.FC = () => {
 
   return (
     <div className="mx-6 xl:mx-18">
-      <div className=" my-4 w-full flex justify-between items-start ">
+      <div className=" my-4 bg-gray-50 z-10 sticky top-2 w-full flex justify-between items-start ">
         <span>
           <h1 className="font-semibold text-3xl">Meeting Summaries</h1>
           <p className="text-md text-gray-400">

@@ -259,7 +259,7 @@ app.post("/meeting/delete/:id", async (req, res) => {
 
 app.get("/meeting/bulk", async (req, res) => {
   try {
-    const allMeetings = await Meeting.find({});
+    const allMeetings = await Meeting.find({}).sort({ updatedAt: -1 });
     if (allMeetings.length == 0) {
       return res
         .status(404)

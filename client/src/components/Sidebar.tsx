@@ -51,8 +51,11 @@ export function SidebarNav() {
   return (
     <div className="border-r border-gray-300 w-64">
       <div className="flex h-full flex-col">
-        <div className="flex h-14 items-center border-b border-gray-300 px-4">
-          <h2 className="text-lg font-semibold">MeetBot</h2>
+        <div className="flex h-14 items-center gap-1 justify-start  border-b border-gray-300 px-4">
+          <img src={"/favicon.png"} className="w-6 h-6" />
+          <h2 className="text-xl font-semibold">
+            Meet<span className="font-light">Bot</span>
+          </h2>
         </div>
         <div className="flex-1 overflow-auto py-2">
           <nav className="grid gap-1 px-2">

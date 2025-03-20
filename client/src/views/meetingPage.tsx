@@ -164,6 +164,7 @@ const MeetingPage: React.FC = () => {
       alert("Error getting summary !");
     } finally {
       setLoading(false);
+      localStorage.clear();
     }
   };
 
