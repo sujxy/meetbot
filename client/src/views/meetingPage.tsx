@@ -27,6 +27,7 @@ const MeetingPage: React.FC = () => {
   const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const transcriptContainerRef = useRef<HTMLDivElement | null>(null);
   const isTyping = useRef<boolean>(false);
   const elapsedTimeRef = useRef<number | null>(null);
   const [pageState, setPageState] = useState<"pre" | "during" | "post">("pre");
@@ -71,6 +72,13 @@ const MeetingPage: React.FC = () => {
       processTranscriptQueue();
     }
   }, [transcriptQueue]);
+
+  useEffect(() => {
+    transcriptContainerRef.current?.scrollTo({
+      top: transcriptContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [transcripts]);
 
   useEffect(() => {
     if (isRecording) {
@@ -150,18 +158,17 @@ const MeetingPage: React.FC = () => {
   };
 
   const generateSummary = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `/summarize?meetId=${localStorage.getItem(
-          "MEET_ID"
-        )}&duration=${formatTime(timeElapsed)}`
-      );
+      const { data } = await axios.post(`/summary/generate`, {
+        meetId: localStorage.getItem("MEET_ID"),
+        duration: formatTime(timeElapsed),
+      });
       if (data.success) {
         navigate(`/summary/${localStorage.getItem("MEET_ID")}`);
       }
     } catch (err: any) {
-      alert("Error getting summary !");
+      alert("Error generating summary !");
     } finally {
       setLoading(false);
       localStorage.clear();
@@ -301,7 +308,10 @@ const MeetingPage: React.FC = () => {
             <h2 className="font-semibold text-xl ">Live Transcription</h2>
           </span>
 
-          <span className="border-s-2 flex border-gray-200 italic px-4 text-md font-light text-gray-500">
+          <span
+            ref={transcriptContainerRef}
+            className="border-s-2 flex border-gray-200 italic px-4 text-md max-h-[60vh] overflow-y-auto font-light text-gray-500"
+          >
             {!transcripts ? (
               <span className="flex items-center gap-2">
                 <LoaderCircle size={18} className="animate-spin" />

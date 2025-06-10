@@ -1,10 +1,14 @@
-import { Home, CalendarPlus, FileText, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Home,
+  CalendarPlus,
+  FileText,
+  Settings,
+  Loader,
+  MessageSquare,
+} from "lucide-react";
 
-interface SidebarNavProps {
-  onNavigate: (view: string) => void;
-  currentView: string;
-}
+import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../context/userContext";
 
 const navItems = [
   {
@@ -26,6 +30,12 @@ const navItems = [
     icon: FileText,
   },
   {
+    id: "chat",
+    route: "/chat",
+    title: "Chat with Meeting",
+    icon: MessageSquare,
+  },
+  {
     id: "settings",
     route: "/settings",
     title: "Settings",
@@ -40,12 +50,18 @@ const getPageRoute = () => {
     return "summary";
   } else if (path.startsWith("/join-meeting")) {
     return "join-meeting";
+  } else if (path.startsWith("/settings")) {
+    return "settings";
+  } else if (path.startsWith("/chat")) {
+    return "chat";
   } else {
     return "home";
   }
 };
+
 export function SidebarNav() {
   const navigate = useNavigate();
+  const { user, isLoading } = useUserContext();
   const activePage = getPageRoute();
 
   return (
@@ -80,15 +96,22 @@ export function SidebarNav() {
         </div>
         <div className="border-t border-gray-300 p-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-gray-200">
-              <span className="flex h-full w-full items-center justify-center text-xs font-medium ">
-                SS
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Sujay Singh</p>
-              <p className="text-xs text-muted">sujay@example.com</p>
-            </div>
+            {isLoading ? (
+              <Loader className={"animate-spin mx-auto"} />
+            ) : (
+              <>
+                <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
+                  <img
+                    className="flex h-full w-full items-center justify-center text-xs font-medium "
+                    src={user?.picture}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{user?.name}</p>
+                  <p className="text-xs text-muted">{user?.email}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

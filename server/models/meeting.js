@@ -4,6 +4,12 @@ import Summary from "./summary.js";
 
 const MeetingSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     title: {
       type: String,
       default: "",
@@ -30,6 +36,10 @@ const MeetingSchema = new mongoose.Schema(
     tags: {
       type: [String],
       default: [],
+    },
+    isSummarized: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

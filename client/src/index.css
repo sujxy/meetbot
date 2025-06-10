@@ -27,5 +27,45 @@
         #summary-container ol li {
             @apply mb-2 text-gray-600;
         }
+
+        /*chat*/
+        #chat-container p {
+            @apply text-sm  mb-3;
+        }
+    
+        /* Bold text */
+        #chat-container strong {
+            @apply font-bold ;
+        }
+    
+        /* Unordered List */
+        #chat-container ul {
+            @apply list-disc pl-5 my-2;
+        }
+        
+        #chat-container ul li {
+            @apply mb-2;
+        }
+    
+        /* Ordered List */
+        #chat-container ol {
+            @apply list-decimal pl-5 my-2;
+        }
+    
+        #chat-container ol li {
+            @apply mb-2 ;
+        }
+
+        .filled-btn {
+            @apply bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200;
+        }
+
+        .outline-btn {
+            @apply border  border-gray-800 text-gray-800 px-4 py-2 rounded-md  hover:bg-gray-100 transition-colors duration-200;
+        }
+
+        .center-div {
+            @apply flex items-center justify-center ;
+        }
 }
 
