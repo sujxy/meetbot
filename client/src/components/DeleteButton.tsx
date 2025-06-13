@@ -1,29 +1,22 @@
 import { useState } from "react";
-import axios from "axios";
+
 import { LoaderCircle, Trash } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface DeleteButtonProps {
-  route: string;
-  onDeleteSuccess?: () => void;
+  deleteHandler?: () => Promise<void>;
 }
 
-const DeleteButton: React.FC<DeleteButtonProps> = ({
-  route,
-  onDeleteSuccess,
-}) => {
+const DeleteButton: React.FC<DeleteButtonProps> = ({ deleteHandler }) => {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete?")) return;
-
+    // if (!confirm("Are you sure you want to delete?")) return;
     setLoading(true);
     try {
-      await axios.post(route);
-      alert("Deleted successfully!");
-      onDeleteSuccess?.(); // Call callback if provided
+      await deleteHandler?.();
     } catch (error) {
-      alert("Error deleting item!");
-      console.error("Delete error:", error);
+      toast.error("Delete error");
     } finally {
       setLoading(false);
     }

@@ -9,12 +9,13 @@ import {
   ScreenShare,
   ScreenShareOff,
   Sparkles,
-  Trash,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import PreMeetingState from "./preMeetingPage";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import DeleteButton from "../components/DeleteButton";
 
 const MeetingPage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -33,22 +34,6 @@ const MeetingPage: React.FC = () => {
   const [pageState, setPageState] = useState<"pre" | "during" | "post">("pre");
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (!currentChunk) return;
-
-  //   let i = 0;
-  //   const interval = setInterval(() => {
-  //     setTranscripts((prev) => prev + currentChunk[i]);
-  //     i++;
-  //     if (i >= currentChunk.length) {
-  //       clearInterval(interval);
-  //       setCurrentChunk("");
-  //     }
-  //   }, 50);
-
-  //   return () => clearInterval(interval);
-  // }, [currentChunk]);
-
   const processTranscriptQueue = () => {
     console.log("Process queue called");
     if (isTyping.current || transcriptQueue.length === 0) return;
@@ -57,9 +42,15 @@ const MeetingPage: React.FC = () => {
     let chunk = transcriptQueue[0];
     let i = 0;
     const interval = setInterval(() => {
-      setTranscripts((prev) => prev + chunk[i]);
-      i++;
-      if (i >= chunk.length) {
+      if (i < chunk.length) {
+        setTranscripts((prev) => {
+          if (chunk[i]) {
+            return prev + chunk[i];
+          }
+          return prev + " ";
+        });
+        i++;
+      } else {
         clearInterval(interval);
         isTyping.current = false;
         setTranscriptQueue((prev) => prev.slice(1));
@@ -165,13 +156,14 @@ const MeetingPage: React.FC = () => {
         duration: formatTime(timeElapsed),
       });
       if (data.success) {
+        toast.success("Generated summary !");
         navigate(`/summary/${localStorage.getItem("MEET_ID")}`);
       }
     } catch (err: any) {
-      alert("Error generating summary !");
+      toast.error("Error generating summary !");
     } finally {
       setLoading(false);
-      localStorage.clear();
+      localStorage.removeItem("MEET_ID");
     }
   };
 
@@ -211,19 +203,21 @@ const MeetingPage: React.FC = () => {
 
   const handleDeleteSession = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const { data } = await axios.post(
         `/meeting/delete/${localStorage.getItem("MEET_ID")}`
       );
       if (data.success) {
-        localStorage.clear();
+        localStorage.removeItem("MEET_ID");
         setPageState("pre");
+        toast.success("Deleted session successfully!");
       }
     } catch (err: any) {
-      alert("failed to delete session");
-    } finally {
-      setLoading(false);
+      toast.error("failed to delete session");
     }
+    // finally {
+    //   setLoading(false);
+    // }
   };
 
   if (pageState === "during") {
@@ -310,7 +304,7 @@ const MeetingPage: React.FC = () => {
 
           <span
             ref={transcriptContainerRef}
-            className="border-s-2 flex border-gray-200 italic px-4 text-md max-h-[60vh] overflow-y-auto font-light text-gray-500"
+            className="border-s-2 flex border-gray-200 italic px-4 text-md max-h-[52vh] overflow-y-auto font-light text-gray-500"
           >
             {!transcripts ? (
               <span className="flex items-center gap-2">
@@ -367,7 +361,7 @@ const MeetingPage: React.FC = () => {
               )}
               <span className="">Generate Summary</span>
             </button>
-            <button
+            {/* <button
               onClick={handleDeleteSession}
               className="bg-red-500/80 text-sm text-gray-50 flex justify-center items-center gap-2 p-2 rounded-md hover:bg-red-500 "
             >
@@ -377,7 +371,8 @@ const MeetingPage: React.FC = () => {
                 <Trash size={18} />
               )}
               <span className="">Delete Session</span>
-            </button>
+            </button> */}
+            <DeleteButton deleteHandler={handleDeleteSession} />
           </div>
         </div>
       </div>

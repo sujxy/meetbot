@@ -1,10 +1,11 @@
-import { Loader2, LoaderCircle, Sparkles, Trash } from "lucide-react";
+import { Loader2, LoaderCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import CopyButton from "./CopyButton";
 import ShareButton from "./ShareButton";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import DeleteButton from "./DeleteButton";
 export default function SummaryContentViewer({
   meetingId,
 }: {
@@ -42,7 +43,7 @@ export default function SummaryContentViewer({
   };
   const handleDeleteSession = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const { data } = await axios.post(`/meeting/delete/${meetingId}`);
       if (data.success) {
         toast.success("Session deleted successfully!");
@@ -50,9 +51,10 @@ export default function SummaryContentViewer({
       }
     } catch (err: any) {
       toast.error("failed to delete session");
-    } finally {
-      setLoading(false);
     }
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function SummaryContentViewer({
           )}
           <span className="">Regenerate</span>
         </button>
-        <button
+        {/* <button
           onClick={handleDeleteSession}
           className="bg-red-500/80 text-sm text-gray-50 flex justify-center items-center gap-2 p-2 rounded-md hover:bg-red-500"
         >
@@ -108,7 +110,8 @@ export default function SummaryContentViewer({
             <Trash size={18} />
           )}
           <span className="">Delete Session</span>
-        </button>
+        </button> */}
+        <DeleteButton deleteHandler={handleDeleteSession} />
       </div>
     </div>
   );
